@@ -1,6 +1,6 @@
 class MicropostsController < ApplicationController
   before_action :require_user_logged_in
-  before_action :correct_user, only: [:destroy]
+  before_action :correct_user, only: [:destroy] #destroy アクションが実行される前に correct_user が実行される
   
   def create
     @micropost = current_user.microposts.build(micropost_params)
@@ -26,7 +26,7 @@ class MicropostsController < ApplicationController
     params.require(:micropost).permit(:content)
   end
   
-  #ユーザのmicropostsかどうかの特定
+  #削除しようとしている Micropost が本当にログインユーザが所有しているものかを確認
   def correct_user 
     @micropost = current_user.microposts.find_by(id: params[:id])
     unless @micropost
