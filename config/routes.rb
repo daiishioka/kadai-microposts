@@ -3,18 +3,20 @@ Rails.application.routes.draw do
 	root to: 'toppages#index'
 	
 	#ログイン情報を保存するためのアクション
-	get 'login' => 'sessions#new'
-	post 'login' => 'sessions#create'
-	delete 'logout' => 'sessions#destroy'
+	get 'login', to: 'sessions#new'
+	post 'login', to: 'sessions#create'
+	delete 'logout', to: 'sessions#destroy'
 	
-	get 'signup' => 'users#new'
+	get 'signup', to: 'users#new'
 	resources :users, only: [:index, :show, :new, :create] do
 		member do
-			get :followings
-			get :followers
+			get :followings,:followers, :likes
 		end
 	end
 	
 	resources :microposts, only: [:create, :destroy]
+	
 	resources :relationships, only: [:create, :destroy]
+	resources :favorites, only: [:create, :destroy]
+	
 end

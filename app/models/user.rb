@@ -1,7 +1,7 @@
 class User < ApplicationRecord
 	before_save { self.email.downcase! }	#文字を全て小文字にする
 	validates :name, presence: true, length: { maximum: 50 }		#空を許さず50文字以内
-	validates :email, presence: true, length: {maximum: 255 },
+	validates :email, presence: true, length: { maximum: 255 },
 										format: { with: /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i },		#emailの正規表現
 										uniqueness: { case_sensitive: false }		#重複を許さず大文字と小文字を区別しない
 	has_secure_password #モデルファイル作成
@@ -13,6 +13,9 @@ class User < ApplicationRecord
 	has_many :followings, through: :relationships, source: :follow	#「フォローしているUser達」を表現し、「中間テーブルを指定」し、「どれを参照先のidとすべきか」を選択
 	has_many :reverses_of_relationship, class_name: 'Relationship', foreign_key: 'follow_id'	#自分をフォローしているUserへの参照
 	has_many :followers, through: :reverses_of_relationship, source: :user
+	
+	has_many :favorites
+	has_many :likes, through: :favorites, source: :micropost
 	
   def follow(other_user)
     unless self == other_user
@@ -31,5 +34,18 @@ class User < ApplicationRecord
   
   def feed_microposts
   	Micropost.where(user_id: self.following_ids + [self.id])
+  end
+  
+  def like(micropost)
+    self.favorites.find_or_create_by(micropost_id: micropost.id)
+  end
+  
+  def unlike(micropost)
+    like = self.favorites.find_by(micropost_id: micropost.id)
+    like.destroy if like
+  end
+  
+  def favorite?(micropost)
+    self.likes.include?(micropost)
   end
 end
